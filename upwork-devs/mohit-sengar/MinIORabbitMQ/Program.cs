@@ -8,6 +8,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Text.Json;
+using System.Collections.Generic;
+using k8s;
+using k8s.Models;
 
 namespace MinIO_RabbitMQ
 {
@@ -31,6 +34,7 @@ namespace MinIO_RabbitMQ
             ConfigureAppSettings(args);
             try
             {
+                
                 Console.WriteLine("Initialize Minio Client...");
                 var minioClient = new MinioClient(MinIOEndpoint,
                                            MinIOAccessKey,
@@ -61,9 +65,38 @@ namespace MinIO_RabbitMQ
                 // Message Id
                 string Id = Guid.NewGuid().ToString("N");
                 // Send Message
-                ConnectionFactory factory = SendMessage(Id, IncomingfilePath, url);
-                //Receive message
-                ReceiveMessage(factory, Id);
+                //ConnectionFactory factory = SendMessage(Id, IncomingfilePath, url);
+                ////Receive message
+                //ReceiveMessage(factory, Id);
+
+
+                Console.WriteLine("Creating a POD");
+                var config = KubernetesClientConfiguration.InClusterConfig();
+                var client = new Kubernetes(config);
+
+                var pod = new V1Pod
+                {
+                    Metadata = new V1ObjectMeta
+                    {
+                        Name = "iis-example"
+                    },
+                    Spec = new V1PodSpec
+                    {
+                        Containers = new List<V1Container>()
+                        {
+                            new V1Container()
+                            {
+                                Name = "iis",
+                                Image = "microsoft/iis:nanoserver",
+                                ImagePullPolicy = "Always",
+                                Ports = new List<V1ContainerPort> { new V1ContainerPort(80) }
+                            }
+                        }
+                    }
+                };
+                var resultPod = client.CreateNamespacedPod(pod, "default");
+                Console.WriteLine("Pod created" + resultPod);
+
                 Console.WriteLine("Enter to stop program");
                 Console.ReadLine();
             }
@@ -115,9 +148,9 @@ namespace MinIO_RabbitMQ
                                            MinIOSecretKey
                                      ).WithSSL();
                     // Check whether the object exists using statObject().
-                    await minioClient.StatObjectAsync(bucketName, fileName);                    
+                    await minioClient.StatObjectAsync(bucketName, fileName);
                     var exePath = Path.GetDirectoryName(System.Reflection
-                                  .Assembly.GetExecutingAssembly().CodeBase);                    
+                                  .Assembly.GetExecutingAssembly().CodeBase);
                     using (FileStream outputFileStream = new FileStream(filePath, FileMode.Create))
                     {
                         // Get input stream to have content of 'my-objectname' from 'my-bucketname'
