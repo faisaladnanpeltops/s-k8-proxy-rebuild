@@ -6,6 +6,9 @@
       "remoteDebugEnabled": false,
       "sqlDebugging": false,
       "nativeDebugging": false
+    },
+    "Docker": {
+      "commandName": "Docker"
     }
   }
 }
