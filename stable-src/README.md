@@ -57,7 +57,7 @@ Select and open the cluster to be tested. On the right top, click on "Kubeconfig
 
 Create a local file called `kubeconfig` and paste the copied data.
 
-Use this file to connect to the cluster by running below commands
+Use this file to connect to the cluster by running below commands. Please note, in the below command the `KUBECONFIG` variable should be set to the path of `kubeconfig` file created in the previous step. It is easy to connect to the cluster, if the file is merged with `~/.kube/config` or if the file is placed in `stable-src` directory which will be created in the next step so that the file can be used to deploy the helm chart.
 
   ```
   export KUBECONFIG=kubeconfig
@@ -71,7 +71,7 @@ Use this file to connect to the cluster by running below commands
 ### Clone the https://github.com/k8-proxy/k8-reverse-proxy repository and checkout `develop` branch
 
 ```
-git clone https://github.com/k8-proxy/k8-reverse-proxy.git
+git clone https://github.com/k8-proxy/k8-reverse-proxy.git --recursive
 cd stable-src
 ```
 
@@ -81,7 +81,7 @@ Replace the <docker registry> with the docker registry or the dockerhub username
 
 Login to the docker registry from the terminal before running below commands to push the images to docker registry.
 
-Below is example command to login to the docker registry(dockerhub)
+Below is example command to login to a docker registry(dockerhub)
 
 `docker login -u <username> -p <password>`
 
@@ -92,7 +92,7 @@ docker push <docker registry>/reverse-proxy-nginx:0.0.1
 docker build squid -t <docker registry>/reverse-proxy-squid:0.0.1
 docker push <docker registry>/reverse-proxy-squid:0.0.1
 
-wget -O c-icap/Glasswall-Rebuild-SDK-Evaluation/Linux/Library/libglasswall.classic.so https://raw.githubusercontent.com/filetrust/Glasswall-Rebuild-SDK-Evaluation/master/Linux/Library/libglasswall.classic.so # Get latest evaluation build of GW Rebuild engine
+wget -O c-icap/Glasswall-Rebuild-SDK-Evaluation/Linux/Library/libglasswall.classic.so https://github.com/filetrust/Glasswall-Rebuild-SDK-Evaluation/releases/download/1.117/libglasswall.classic.so # Get latest evaluation build of GW Rebuild engine
 docker build c-icap -t <docker registry>/reverse-proxy-c-icap:0.0.1
 docker push <docker registry>/reverse-proxy-c-icap:0.0.1
 ```
