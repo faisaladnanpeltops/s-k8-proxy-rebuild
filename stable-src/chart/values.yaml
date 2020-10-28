@@ -54,7 +54,6 @@ service:
     name: squid
     type: ClusterIP
     additionalHosts:
-    commonName:
     externalPort: 8080
     internalPort: 8080
   icap:
@@ -63,7 +62,6 @@ service:
     name: icap
     type: ClusterIP
     additionalHosts:
-    commonName:
     externalPort: 1344
     internalPort: 1344
 ingress:
@@ -75,7 +73,6 @@ ingress:
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     kubernetes.io/ingress.class: "nginx"
-    # kubernetes.io/ingress.class: traefik
   path: /
 livenessProbe:
   path: "/"
@@ -105,10 +102,10 @@ resources:
       memory: 500Mi
   icap:
     limits:
-      cpu: 250m
+      cpu: 500m
       memory: 500Mi
     requests:
-      cpu: 250m
+      cpu: 500m
       memory: 500Mi
 
 #
