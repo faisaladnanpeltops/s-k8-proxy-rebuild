@@ -12,12 +12,12 @@ Rancher is a container management platform built for organizations that deploy c
 
 ```
 docker run -d --restart=unless-stopped \
-  -p 8080:80 -p 1443:443 \
+  -p 8080:80 -p 8443:443 \
   --privileged \
   rancher/rancher:latest
 ```
 
-Once the docker is running, it takes few minutes to initialize the server. Once the server is started, access the rancher UI on https://localhost:1443
+Once the docker is running, it takes few minutes to initialize the server. Once the server is started, access the rancher UI on https://<host or IP>:8443
 
 2. Setup AWS cloud credentials
 
@@ -104,6 +104,8 @@ Image tag "0.0.1" in below command is just used as an example. Update below comm
 
 From `stable-src` directory of `s-k8-proxy-rebuild` repository run below commands to deploy the helm chart.
 
+Make sure the variable `KUBECONFIG` is pointing to the path of `kubeconfig` file from the current terminal.
+
 ```
 helm upgrade --install \
 --set image.nginx.repository=<docker registry>/reverse-proxy-nginx \
@@ -120,8 +122,11 @@ Verify that all pods(nginx, squid, icap) are running by executing below command
 kubectl get pods
 ```
 
-Once all the pods are running, forward the traffic from local machine to nginx service.
-If the below command gives permission error to bind the port 443, please run the command with `sudo`
+Once all the pods are running, there are 2 options to connect to the proxied website.
+
+1. Forward the traffic from local machine to nginx service.
+
+If the below command gives permission error to bind the port 443, please run the command with `root` user.
 
 ```
 kubectl port-forward svc/reverse-proxy-reverse-proxy-nginx 443:443
@@ -132,6 +137,16 @@ You have to assign all proxied domains to the localhost address by adding them t
 
 ```
 127.0.0.1 gov.uk.glasswall-icap.com www.gov.uk.glasswall-icap.com assets.publishing.service.gov.uk.glasswall-icap.com
+```
+
+2. Connect using nginx ingress.
+
+You have to assign all proxied domains to the IP address of the machine where helm chart is deployed by adding them to hosts file ( `C:\Windows\System32\drivers\etc\hosts` on Windows , `/etc/hosts` on Linux )
+  
+  For example: 
+
+```
+54.78.209.23 gov.uk.glasswall-icap.com www.gov.uk.glasswall-icap.com assets.publishing.service.gov.uk.glasswall-icap.com
 ```
 
 You can test the stack functionality by downloading [a rich PDF file](https://assets.publishing.service.gov.uk.glasswall-icap.com/government/uploads/system/uploads/attachment_data/file/901225/uk-internal-market-white-paper.pdf) through the proxy and testing it against [file-drop.co.uk](https://file-drop.co.uk)
