@@ -97,7 +97,7 @@ docker build c-icap -t <docker registry>/reverse-proxy-c-icap:0.0.1
 docker push <docker registry>/reverse-proxy-c-icap:0.0.1
 ```
 
-### Create and setup SSL certificates to use in proxy website.
+### Create and setup SSL certificates to use in proxy website. [Optional]
 
 Gather one or more DNS names for which SSL certificate is needed.
 
@@ -143,9 +143,7 @@ From `stable-src` directory of `s-k8-proxy-rebuild` repository run below command
 
 Make sure the variable `KUBECONFIG` is pointing to the path of `kubeconfig` file from the current terminal.
 
-Please note if you want to use an external ICAP server, add these 2 lines in the middle of the below command after updating the IP address.
-
-If ICAP_URL is set, icap server will not be deployed as part of this helm chart.
+[Optional] Please note if you want to use an external ICAP server, add these 2 lines in the middle of the below command after updating the IP address. If ICAP_URL is set, icap server will not be deployed as part of this helm chart.
 
 ```
 --set application.nginx.env.ICAP_URL=icap://<IP address>:1344/gw_rebuild \
