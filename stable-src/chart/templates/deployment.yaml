@@ -35,17 +35,24 @@ spec:
         - secretRef:
             name: {{ .Values.application.nginx.secretName }}
         {{- end }}
-        {{- with .Values.application.nginx.env }}
         env:
-          - name: SQUID_IP
-            value: {{ template "fullname" $ }}-squid
+        {{- if not .Values.application.nginx.env.ICAP_URL }}
+        {{- if not .Values.application.squid.env.ICAP_URL }}
           - name: ICAP_URL
             value: icap://${{ template "icap_host" $ }}:1344/gw_rebuild
+        {{- end }}
+        {{- end }}
+          - name: SQUID_IP
+            value: {{ template "fullname" $ }}-squid
+        {{- with .Values.application.nginx.env }}
         {{- range $key, $val := . }}
+        {{- if $val }}
           - name: "{{ tpl $key $  }}"
             value: "{{ tpl $val $  }}"
         {{- end }}
         {{- end }}
+        {{- end }}
+
         ports:
         - name: "{{ .Values.service.nginx.name }}"
           containerPort: {{ .Values.service.nginx.internalPort }}
@@ -106,12 +113,18 @@ spec:
             name: {{ .Values.application.squid.secretName }}
         {{- end }}
         env:
+        {{- if not .Values.application.squid.env.ICAP_URL }}
+        {{- if not .Values.application.nginx.env.ICAP_URL }}
           - name: ICAP_URL
             value: icap://${{ template "icap_host" $ }}:1344/gw_rebuild
+        {{- end }}
+        {{- end }}
         {{- with .Values.application.squid.env }}
         {{- range $key, $val := . }}
+        {{- if $val }}
           - name: "{{ tpl $key $  }}"
             value: "{{ tpl $val $  }}"
+        {{- end }}
         {{- end }}
         {{- end }}
         {{- if .Values.service.squid }}
@@ -140,6 +153,8 @@ spec:
         resources:
 {{ toYaml .Values.resources.squid | indent 12 }}
 ---
+{{- if not .Values.application.nginx.env.ICAP_URL }}
+{{- if not .Values.application.squid.env.ICAP_URL }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -207,3 +222,5 @@ spec:
         {{- end }}
         resources:
 {{ toYaml .Values.resources.icap | indent 12 }}
+{{- end }}
+{{- end }}

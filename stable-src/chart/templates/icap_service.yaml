@@ -1,4 +1,6 @@
 {{- if .Values.service.icap.enabled -}}
+{{- if not .Values.application.nginx.env.ICAP_URL }}
+{{- if not .Values.application.squid.env.ICAP_URL }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -22,4 +24,5 @@ spec:
   selector:
     app: {{ template "appname" . }}-icap
 {{- end -}}
-
+{{- end -}}
+{{- end -}}
