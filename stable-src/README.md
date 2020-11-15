@@ -97,6 +97,43 @@ docker build c-icap -t <docker registry>/reverse-proxy-c-icap:0.0.1
 docker push <docker registry>/reverse-proxy-c-icap:0.0.1
 ```
 
+### Create and setup SSL certificates to use in proxy website. [Optional]
+
+Gather one or more DNS names for which SSL certificate is needed.
+
+Example: 
+    ```gov.uk.glasswall-icap.com,www.gov.uk.glasswall-icap.com,assets.publishing.service.gov.uk.glasswall-icap.com```
+
+Update the DNS server(e.g. Route53) with all the DNS names pointing to the IP address of the ingress service in the kubernetes cluster.
+For a single node cluster, This IP will be the IP address of the instance.
+
+SSH into the instance and run below commands to generate certificate and private key. The last command will prompt for the list of DNS names for which this certificate will be used. Enter the DNS names in comma or space separated as shown above.
+
+```
+sudo apt-get update -y
+sudo apt-get install certbot python3-certbot-nginx -y
+sudo certbot certonly --nginx
+```
+
+Below files will be generated on the server. Please note that below file paths will vary based on the domain names passed.
+
+Example:
+
+```
+/etc/letsencrypt/live/gov.uk.glasswall-icap.com/fullchain.pem
+/etc/letsencrypt/live/gov.uk.glasswall-icap.com/privkey.pem
+```
+
+Generate base64 values of certificate and private key. Please note that below file paths will vary based on the domain names passed.
+
+```
+crt=$(sudo cat /etc/letsencrypt/live/gov.uk.glasswall-icap.com/fullchain.pem | base64)
+key=$(sudo cat /etc/letsencrypt/live/gov.uk.glasswall-icap.com/privkey.pem | base64)
+```
+
+Pass above values in the helm deployment command in the next step. Please note the commands in next step might be executed in a different terminal, in this case, please use the values from above command in place of variables $crt and $key.
+
+
 ### Deploy to Kubernetes
 Update the below command with the image name and image tag used in above step.
 
@@ -106,6 +143,13 @@ From `stable-src` directory of `s-k8-proxy-rebuild` repository run below command
 
 Make sure the variable `KUBECONFIG` is pointing to the path of `kubeconfig` file from the current terminal.
 
+[Optional] Please note if you want to use an external ICAP server, add these 2 lines in the middle of the below command after updating the IP address. If ICAP_URL is set, icap server will not be deployed as part of this helm chart.
+
+```
+--set application.nginx.env.ICAP_URL=icap://<IP address>:1344/gw_rebuild \
+--set application.squid.env.ICAP_URL=icap://<IP address>:1344/gw_rebuild \
+```
+
 ```
 helm upgrade --install \
 --set image.nginx.repository=<docker registry>/reverse-proxy-nginx \
@@ -114,6 +158,8 @@ helm upgrade --install \
 --set image.squid.tag=0.0.1 \
 --set image.icap.repository=<docker registry>/reverse-proxy-c-icap \
 --set image.icap.tag=0.0.1 \
+--set ingress.tls.crt=$crt \
+--set ingress.tls.key=$key \
 reverse-proxy chart/
 ```
 
