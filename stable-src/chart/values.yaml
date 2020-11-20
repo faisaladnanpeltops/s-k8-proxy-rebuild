@@ -31,6 +31,7 @@ application:
       ALLOWED_DOMAINS: gov.uk.glasswall-icap.com,www.gov.uk.glasswall-icap.com,assets.publishing.service.gov.uk.glasswall-icap.com
       ROOT_DOMAIN: glasswall-icap.com
       ICAP_URL:
+      ICAP_EXCLUDE_MIME_TYPE: "text/html,application/javascript"
     secrets: {}
   icap:
     secretName: reverse-proxy-icap
