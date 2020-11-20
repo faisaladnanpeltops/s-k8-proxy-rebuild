@@ -36,6 +36,10 @@ spec:
             name: {{ .Values.application.nginx.secretName }}
         {{- end }}
         env:
+          - name: NODE_IP
+            valueFrom:
+              fieldRef:
+                status.hostIP
         {{- if not .Values.application.nginx.env.ICAP_URL }}
         {{- if not .Values.application.squid.env.ICAP_URL }}
           - name: ICAP_URL
